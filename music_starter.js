@@ -107,6 +107,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
     // }
     // if(other>90){
     //   rotate(5)
+    //
     // }
     if(other > 65){
         image(trumpetImage, newTrumet, newTrumet/2)
