@@ -1,217 +1,239 @@
 let firstRun = true;
 let drumImage;
+let pianoImage
+let handsImage
 let backgrounImage;
 let trumpetImage;
 let trumpetImage1;
 let trumpetImage2;
-let notes = [];
-let noteSpawnRate = 60;
-// vocal, drum, bass, and other are volumes ranging from 0 to 100
+let bassImage;
+let redMusicImage;
+let greenMusicImage;
+let blueMusicImage;
+let rainbowMusicImage;
+var x;
 
+let bassNotes = [];
+let trumpetNotes = [];
 
-function shadow(size){
+let noteSpawnRate = 40;
+let TrumpetnoteSpawnRate = 40;
+let noteMin = 0.08;
+let noteMax = 0.15;
+
+function shadow(size) {
   drawingContext.shadowOffsetX = size;
   drawingContext.shadowOffsetY = -size;
   drawingContext.shadowBlur = 10;
   drawingContext.shadowColor = 'black';
 }
 
+
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
-  background(100)
-  textFont('Helvetica'); // please use CSS safe fonts
-  rectMode(CENTER)
+  background(100);
+  textFont('Helvetica');
+  rectMode(CENTER);
   textSize(24);
 
-   let bar_spacing = height / 10;
-   let bar_height = width / 12;
-   let bar_pos_x = width / 2;
 
-   
-    if (firstRun){
-      rectMode(CENTER)
-      imageMode(CENTER)
-      drumImage = loadImage('drumer.png');
-      backgrounImage = loadImage('background.png');
-      trumpetImage = loadImage('trumpet.png');
-      trumpetImage1 = loadImage('trumpet.png');
-      trumpetImage2 = loadImage('trumpet.png');
-      bassImage = loadImage('bass.png');
-      redMusicImage = loadImage('redMusic.png');
-      greenMusicImage = loadImage('greenMusic.png');
-      blueMusicImage = loadImage('blueMusic.png');
-      rainbowMusicImage = loadImage('rainbowMusic.png');
-      firstRun = false;
-    }
+  let bar_spacing = height / 10;
+  let bar_height = width / 12;
+  let bar_pos_x = width / 2;
 
-    
+  if (firstRun) {
+    rectMode(CENTER);
+    imageMode(CENTER);
+    drumImage = loadImage('drumer.png');
+    handsImage = loadImage('hands.png');
+    pianoImage = loadImage('piano.png');
+    backgrounImage = loadImage('background.png');
+    trumpetImage = loadImage('trumpet.png');
+    trumpetImage1 = loadImage('trumpet.png');
+    trumpetImage2 = loadImage('trumpet.png');
+    bassImage = loadImage('bass.png');
+    redMusicImage = loadImage('redMusic.png');
+    greenMusicImage = loadImage('greenMusic.png');
+    blueMusicImage = loadImage('blueMusic.png');
+    rainbowMusicImage = loadImage('rainbowMusic.png');
+    firstRun = false;
+  }
 
-    //Background
-    push()
-    tint(120);
-    backgrounImage.resize(1920, 1080);
-    image(backgrounImage, 960, 540);
-    pop()
+  // Background
+  push();
+  tint(120);
+  backgrounImage.resize(1920, 1080);
+  image(backgrounImage, 960, 540);
+  pop();
 
-    //Drummer
+  // Drummer
+  push();
+  shadow(20);
+  translate(300, 800);
+  let newDrum = map(drum, 0, 100, 1, 2, true);
+  if (drum >= 50) {
+    scale(newDrum - 0.5, newDrum - 0.5);
+  }
+  image(drumImage, 0, 0);
+  pop();
+
+// Piano
+
+// Use sin function for hand movement
+push()
+translate(800, 400);
+image(pianoImage, 0, 0);
+push();
+translate(800, 400);
+image(handsImage, 0, 0);
+pop()
+pop();
+
+
+  // Bass
+  push();
+  translate(500, 600);
+  let newBass = map(bass, 0, 100, 1, 1.3, true);
+  let newNotes = map(bass, 0, 100, -50, 50, true);
+  let newBassColor = map(bass, 0, 100, -50, 100, true);
+  push();
+  scale(1, newBass);
+  image(bassImage, bass / 4, bass / 4);
+  pop();
+
+  if (bass > 60) {
     push();
-    shadow(20);
-    translate(300,800)
-    let newDrum = map(drum, 0, 100, 1, 2, true);
-    if (drum >= 50){
-      //drumImage.resize(drum + 500, drum/4 + 500);
-  
-      scale(newDrum - .5, newDrum - .5)
-      }
-    image(drumImage, 0, 0);
-
-    print(newDrum);
+    translate(50, 200);
+    noStroke();
+    fill(320, 350, 0, newBassColor);
+    triangle(-250, 300, 0, -1000, 300, 300);
     pop();
+  }
 
+  if (bass > 60 && frameCount % noteSpawnRate === 0) {
+    let randomX = bass + random(-50, 100);
+    let note = {
+      x: randomX,
+      y: bass - 100,
+      speed: random(2, 5),
+      image: randomNoteImage(),
+      size: random(noteMin, noteMax),
+    };
+    bassNotes.push(note);
+  }
 
-    //Bass
-    push()
-    translate(500, 600);
-    let newBass = map(bass, 0, 100, 1, 1.3, true);
-    let newNotes = map(bass, 0, 100, -50, 50, true);
+  // Display and move bass notes
+  for (let i = bassNotes.length - 1; i >= 0; i--) {
+    let note = bassNotes[i];
+    let scaledWidth = note.image.width * note.size;
+    let scaledHeight = note.image.height * note.size;
+    image(
+      note.image,
+      note.x - scaledWidth / 2,
+      note.y - scaledHeight / 2,
+      scaledWidth,
+      scaledHeight
+    );
+    note.y -= note.speed;
+
+    if (note.y < -600) {
+      bassNotes.splice(i, 1);
+    }
+  }
+
+  pop();
+
+  // Trumpet
+  push();
+  shadow(20);
+  translate(1500, 800);
+  let newTrumpet = map(other, 0, 100, -50, 50, true);
+  let newTrumpetRotate = map(other, 0, 100, -50, 50, true);
+  let newTrumpetColor = map(other, 0, 100, -50, 100, true);
+  let trumpetNoteSpeed = map(other, 0, 100, -3, 15, true);
+  let trumpetScale = map(other, 70, 100, 1, 1.2, true);
+  TrumpetnoteSpawnRate = 100 - other;
+
+  if (other > 65) {
     push();
-    scale(1, newBass);
-    image(bassImage, bass/4, bass/4);
-    pop()
-    
-    if (bass > 60 && frameCount % noteSpawnRate === 0) {
-      // Generate a random x-coordinate around the bass player
-      let randomX = bass + random(-50, 100); // Adjust the range based on your preference
-  
-      // Generate a random note
-      let note = {
-        x: randomX,
-        y: bass - 100,
-        speed: random(2, 5), // Adjust the speed of the note
-        image: randomNoteImage(), // Function to get a random note image
-        size: random(0.1, 0.5) // Adjust the range for smaller sizes
-      };
-  
-      // Add the note to the array
-      notes.push(note);
-    }
-  
-    // Display and move notes
-    for (let i = notes.length - 1; i >= 0; i--) {
-      let note = notes[i];
-  
-      // Scale the note image based on the size property
-      let scaledWidth = note.image.width * note.size;
-      let scaledHeight = note.image.height * note.size;
-      image(note.image, note.x - scaledWidth / 2, note.y - scaledHeight / 2, scaledWidth, scaledHeight);
-  
-      // Move the note upwards
-      note.y -= note.speed;
-  
-      // Remove notes that go off-screen
-      if (note.y < -600) {
-        notes.splice(i, 1);
-      }
-    }
+    tint(90, 90, 30);
+    translate(-70, 30);
+    image(trumpetImage, newTrumpet, newTrumpet / 2);
+    pop();
+    push();
+    tint(0, 50, 110);
+    translate(70, 30);
+    image(trumpetImage, newTrumpet, newTrumpet / 2);
+    pop();
+  }
 
-  
-  // Function to get a random note image
-  function randomNoteImage() {
-    let images = [redMusicImage, greenMusicImage, blueMusicImage, rainbowMusicImage];
-    return random(images);
+
+push()
+  // Adjust the TrumpetnoteSpawnRate based on the "other" value
+  TrumpetnoteSpawnRate = map(other, 70, 100, 80, 50, true);
+
+  if (other > 78 && other < 80) {
+    print("Generating trumpet note");
+    let randomX = other + random(-50, 100);
+    let note = {
+      x: randomX - 50,
+      y: other - 100,
+      speed: map(other, 70, 100, 5, 20, true),
+      image: randomNoteImage(),
+      size: random(noteMin, noteMax) * trumpetScale,
+    };
+    trumpetNotes.push(note);
+  }
+
+  for (let i = trumpetNotes.length - 1; i >= 0; i--) {
+    let note = trumpetNotes[i];
+    let scaledWidth = note.image.width * note.size;
+    let scaledHeight = note.image.height * note.size;
+    image(
+      note.image,
+      note.x - scaledWidth / 2,
+      note.y - scaledHeight / 2,
+      scaledWidth,
+      scaledHeight
+    );
+    note.y -= note.speed;
+
+    if (note.y < -800) {
+      trumpetNotes.splice(i, 1);
+    }
   }
   pop()
 
+  if (other > 70) {
+    rotate((other - 70) * 2.5);
+  }
 
-    //Trumpet
-    push()
-    shadow(20);
+
+  if (other > 65) {
+    image(trumpetImage, newTrumpet, newTrumpet / 2);
+  } else {
+    push();
+    tint(90, 90, 30);
+    translate(-70, 30);
+    image(trumpetImage, 0, 0);
+    pop();
+    push();
+    tint(0, 50, 110);
+    translate(70, 30);
+    image(trumpetImage, 0, 0);
+    pop();
+    image(trumpetImage, 0, 0);
+  }
+  pop();
+
+  if (other > 70) {
     translate(1500, 800);
-    let newTrumet = map(other, 0, 100, -50, 50, true);
-    let newTrumetRotate = map(other, 0, 100, -50, 50, true);
-    let newTrumetColor = map(other, 0, 100, -50, 100, true);
-    if(other > 65){
-      push()
-      tint(90, 90, 30);
-      translate(-70, 30)
-      image(trumpetImage, newTrumet, newTrumet/2);
-      pop()
-      push()
-      tint(0, 50, 110);
-      translate(70, 30)
-      image(trumpetImage, newTrumet, newTrumet/2);
-      pop()
-  }
-    push()
-    if(other>70){
-      rotate((other - 70) * 2.5)
-    }
-
-    if(other > 65){
-        image(trumpetImage, newTrumet, newTrumet/2)
-        pop()
-    } else {
-      push()
-      tint(90, 90, 30);
-      translate(-70, 30)
-      image(trumpetImage, 0, 0);
-      pop()
-      push()
-      tint(0, 50, 110);
-      translate(70, 30)
-      image(trumpetImage, 0, 0);
-      pop()
-      image(trumpetImage, 0, 0);
-      
-      
-       
-    }
-    pop()
-    if (other > 70){
-      translate(1500, 800);
-      noStroke()
-    fill(320, 350, 0, newTrumetColor);
+    noStroke();
+    fill(320, 350, 0, newTrumpetColor);
     triangle(-250, 300, 0, -1000, 300, 300);
-    }
-
-    
-    
-    
-      
-    
-
-    
-
-
-
-
-
-  //  // vocal bar is red
-  //  fill(200, 0, 0);
-  //  rect(bar_pos_x, height / 2 + 1 * bar_spacing, 4 * vocal, bar_height);
-  //  fill(0);
-  //  text("vocals", bar_pos_x, height / 2 + 1 * bar_spacing + 8);
- 
-  //  // drum bar is green
-  //  fill(0, 200, 0);
-  //  rect(bar_pos_x, height / 2 + 2 * bar_spacing, 4 * drum, bar_height);
-  //  fill(0);
-  //  text("drums", bar_pos_x, height / 2 + 2 * bar_spacing + 8);
- 
-  //  // bass bar is blue
-  //  fill(50, 50, 240);
-  //  rect(bar_pos_x, height / 2 + 3 * bar_spacing, 4 * bass, bar_height);
-  //  fill(0);
-  //  text("bass", bar_pos_x, height / 2 + 3 * bar_spacing + 8);
- 
-  //  // other bar is white
-  //  fill(200, 200, 200);
-  //  rect(bar_pos_x, height / 2 + 4 * bar_spacing, 4 * other, bar_height);
-  //  fill(0);
-  //  text("other", bar_pos_x, height / 2 + 4 * bar_spacing + 8);
-  //  fill(255, 255, 0);
- 
-  //  // display "words"
-  //  textAlign(CENTER);
-  //  textSize(vocal);
-  //  text(words, width/2, height/3);
   }
+}
+
+function randomNoteImage() {
+  let images = [redMusicImage, greenMusicImage, blueMusicImage, rainbowMusicImage];
+  return random(images);
+}
