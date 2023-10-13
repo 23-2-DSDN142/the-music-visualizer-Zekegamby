@@ -5,6 +5,7 @@ let handsImage
 let backgrounImage;
 let trumpetImage;
 let trumpetImage1;
+let singerImage;
 let trumpetImage2;
 let bassImage;
 let redMusicImage;
@@ -45,10 +46,11 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
     imageMode(CENTER);
     drumImage = loadImage('drumer.png');
     handsImage = loadImage('hands.png');
-    pianoImage = loadImage('piano.png');
+    pianoImage = loadImage('piano.png'); //image by ken Dalley
     backgrounImage = loadImage('background.png');
     trumpetImage = loadImage('trumpet.png');
     trumpetImage1 = loadImage('trumpet.png');
+    singerImage = loadImage('singers.png')
     trumpetImage2 = loadImage('trumpet.png');
     bassImage = loadImage('bass.png');
     redMusicImage = loadImage('redMusic.png');
@@ -68,7 +70,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   // Drummer
   push();
   shadow(20);
-  translate(300, 800);
+  translate(200, 800);
   let newDrum = map(drum, 0, 100, 1, 2, true);
   if (drum >= 50) {
     scale(newDrum - 0.5, newDrum - 0.5);
@@ -77,15 +79,26 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   pop();
 
 // Piano
-
-// Use sin function for hand movement
+let newPiano = map(other, 40, 100, -50, 100, true);
+let newPianoColor = map(other, 0, 100, 0, 100, true);
 push()
-translate(800, 400);
+translate(1200, 300);
 image(pianoImage, 0, 0);
 push();
-translate(800, 400);
+translate(newPiano, newPiano/5);
+rotate(newPiano/10);
 image(handsImage, 0, 0);
 pop()
+
+if (other > 40) {
+  push();
+  scale(1.3, 1.3)
+  translate(-50, 500);
+  noStroke();
+  fill(100, 0, 200, newPianoColor);
+  triangle(-250, 300, 0, -1000, 300, 300);
+  pop();
+}
 pop();
 
 
@@ -104,7 +117,7 @@ pop();
     push();
     translate(50, 200);
     noStroke();
-    fill(320, 350, 0, newBassColor);
+    fill(320, 100, 100, newBassColor);
     triangle(-250, 300, 0, -1000, 300, 300);
     pop();
   }
@@ -142,6 +155,31 @@ pop();
 
   pop();
 
+
+  //singer
+  push();
+  let newSingerColor = map(vocal, 0, 100, 0, 100, true);
+  scale(0.8, 0.8);
+  translate(1100, 1000);
+  newVocal = map(vocal, 40, 100, 1, 1.5, true);
+  push()
+  scale(1, newVocal); // Always scale the singer image based on the vocal value
+  image(singerImage, 0, 0);
+  pop()
+
+  if (vocal > 40) {
+    push();
+    scale(1.3, 1.3)
+    translate(0, 0);
+    noStroke();
+    fill(100, 350, 200, newSingerColor);
+    triangle(-250, 300, 0, -1000, 300, 300);
+    pop();
+  }
+  pop();
+
+
+
   // Trumpet
   push();
   shadow(20);
@@ -165,13 +203,13 @@ pop();
     image(trumpetImage, newTrumpet, newTrumpet / 2);
     pop();
   }
-
+ 
 
 push()
   // Adjust the TrumpetnoteSpawnRate based on the "other" value
   TrumpetnoteSpawnRate = map(other, 70, 100, 80, 50, true);
 
-  if (other > 78 && other < 80) {
+  if (other > 78 && other < 82) {
     print("Generating trumpet note");
     let randomX = other + random(-50, 100);
     let note = {
@@ -231,9 +269,14 @@ push()
     fill(320, 350, 0, newTrumpetColor);
     triangle(-250, 300, 0, -1000, 300, 300);
   }
-}
+
 
 function randomNoteImage() {
   let images = [redMusicImage, greenMusicImage, blueMusicImage, rainbowMusicImage];
   return random(images);
 }
+
+
+
+
+  }
